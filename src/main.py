@@ -27,11 +27,11 @@ for lineup in nbaLineups:
     try:
         visitorGuaranteedStart = lineup.find("ul", class_ = "lineup__list is-visit").find_all("li", class_ = "lineup__player is-pct-play-100")
         for player in visitorGuaranteedStart:
-            STARTING_PLAYERS.append([player.find("a").text, player.find("div", class_ = "lineup__pos").text, "visitor"])
+            STARTING_PLAYERS.append([player.find("a").text, player.find("div", class_ = "lineup__pos").text, "visitor", player.find("a")['href']])
 
         homeGuaranteedStart = lineup.find("ul", class_ = "lineup__list is-home").find_all("li", class_ = "lineup__player is-pct-play-100")
         for player in homeGuaranteedStart:
-            STARTING_PLAYERS.append([player.find("a").text, player.find("div", class_ = "lineup__pos").text, "home"])
+            STARTING_PLAYERS.append([player.find("a").text, player.find("div", class_ = "lineup__pos").text, "home", player.find("a")['href']])
         
     except:
         pass

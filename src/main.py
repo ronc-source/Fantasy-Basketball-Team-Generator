@@ -5,6 +5,7 @@ from requests_html import HTMLSession
 
 #Constants
 DAILY_LINEUP_URL = "https://www.rotowire.com/basketball/nba-lineups.php"
+STATIC_URL = "https://www.rotowire.com"
 STARTING_PLAYERS = []
 POINTS = 1
 REBOUNDS = 1.2
@@ -13,27 +14,67 @@ STEALS = 3
 BLOCKS = 3
 TURNOVERS = -1
 
-#Create an HTML Session to render the web page JavaScript
-createdSession = HTMLSession()
-renderLineupPage = createdSession.get(DAILY_LINEUP_URL)
-renderLineupPage.html.render()
 
-#Parse through the page HTML using the BeautifulSoup library
-mainPage = BeautifulSoup(renderLineupPage.html.html, "html.parser")
-nbaLineups = mainPage.find_all("div", class_ = "lineup__main")
+#Get the players guaranteed to start for each team today
+def getStartingPlayers(playerList):
 
-#Update the STARTING_PLAYERS array with the players guaranteed to start for each team today
-for lineup in nbaLineups:
+    #Create an HTML Session to render the web page JavaScript
+    createdSession = HTMLSession()
+    renderLineupPage = createdSession.get(DAILY_LINEUP_URL)
+    renderLineupPage.html.render()
+
+    #Parse through the page HTML using the BeautifulSoup library
+    mainPage = BeautifulSoup(renderLineupPage.html.html, "html.parser")
+    nbaLineups = mainPage.find_all("div", class_ = "lineup__main")
+
+    for lineup in nbaLineups:
+        try:
+            visitorGuaranteedStart = lineup.find("ul", class_ = "lineup__list is-visit").find_all("li", class_ = "lineup__player is-pct-play-100")
+            for player in visitorGuaranteedStart:
+                playerList.append([player.find("a").text, player.find("div", class_ = "lineup__pos").text, "visitor", player.find("a")['href']])
+
+            homeGuaranteedStart = lineup.find("ul", class_ = "lineup__list is-home").find_all("li", class_ = "lineup__player is-pct-play-100")
+            for player in homeGuaranteedStart:
+                playerList.append([player.find("a").text, player.find("div", class_ = "lineup__pos").text, "home", player.find("a")['href']])
+        except:
+            pass
+
+#getStartingPlayers(STARTING_PLAYERS)       
+#print(STARTING_PLAYERS)
+
+#Calculate weighted fantasy score for a player
+def getFantasyScore(requiredStats):
     try:
-        visitorGuaranteedStart = lineup.find("ul", class_ = "lineup__list is-visit").find_all("li", class_ = "lineup__player is-pct-play-100")
-        for player in visitorGuaranteedStart:
-            STARTING_PLAYERS.append([player.find("a").text, player.find("div", class_ = "lineup__pos").text, "visitor", player.find("a")['href']])
-
-        homeGuaranteedStart = lineup.find("ul", class_ = "lineup__list is-home").find_all("li", class_ = "lineup__player is-pct-play-100")
-        for player in homeGuaranteedStart:
-            STARTING_PLAYERS.append([player.find("a").text, player.find("div", class_ = "lineup__pos").text, "home", player.find("a")['href']])
-        
+        points = requiredStats[0] * POINTS
+        rebounds = requiredStats[1] * REBOUNDS
+        assists = requiredStats[2] * ASSISTS
+        steals = requiredStats[3] * STEALS
+        blocks = requiredStats[4] * BLOCKS
+        turnovers = requiredStats[5] * TURNOVERS
+        return points + rebounds + assists + steals + blocks + turnovers
     except:
-        pass
-        
-print(STARTING_PLAYERS)
+        print("Error: Player data is either missing or incorrectly formatted")
+
+
+def getStarterStats(player):
+    #Ex. player = ['Pascal Siakam', 'C', 'home', '/basketball/player.php?id=3922']
+    
+    #Create an HTML Session to render the web page JavaScript
+    createdSession = HTMLSession()
+    renderStatPage = createdSession.get(STATIC_URL + player[-1])
+    renderStatPage.html.render()
+
+    #Parse through the page HTML using the BeautifulSoup library
+    mainPage = BeautifulSoup(renderStatPage.html.html, "html.parser")
+    perThirtySix = mainPage.find('div', id = "nbaStatsPer36")
+    print(perThirtySix)
+    
+
+
+player = ['Pascal Siakam', 'C', 'home', '/basketball/player.php?id=3922']
+getStarterStats(player)
+
+
+
+#Iterate through the STARTING_PLAYERS array and update each player array with their weighted fantasy score at the end
+

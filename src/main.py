@@ -10,6 +10,11 @@ DAILY_LINEUP_URL = "https://www.rotowire.com/basketball/nba-lineups.php"
 MAIN_URL = "https://www.rotowire.com"
 AJAX_INFO_URL = "https://www.rotowire.com/basketball/ajax/player-page-data.php?"
 STARTING_PLAYERS = []
+ALL_PG = []
+ALL_SG = []
+ALL_SF = []
+ALL_PF = []
+ALL_C = []
 POINTS = 1
 REBOUNDS = 1.2
 ASSISTS = 1.5
@@ -96,22 +101,113 @@ def addScore(player):
     except:
         player.append(0.0)
         pass
+
+    #Dont want to spam requests to rotowire, will wait 2 seconds between requests
+    time.sleep(2)
     
-    #Dont want to spam requests to rotowire, will wait 5 seconds between requests
-    time.sleep(1)
+
+#Merge sort algorithm to sort players by weight, code taken from: https://www.geeksforgeeks.org/merge-sort/
+def playerMergeSort(playerArray):
+    if len(playerArray) > 1:
+
+        #Middle of the array
+        mid = len(playerArray) // 2
+
+        #Left side of the Array (not including middle value)
+        left = playerArray[:mid]
+
+        #Right side fo the Array (including middle value)
+        right = playerArray[mid:]
+
+        #Sort left side
+        playerMergeSort(left)
+
+        #Sort right side
+        playerMergeSort(right)
+
+        i = j = k = 0
+
+        #Move data to left and right arrays
+        while i < len(left) and j < len(right):
+            if(left[i][-1] < right[i][-1]):
+                playerArray[k] = left[i]
+                i += 1
+            else:
+                playerArray[k] = right[j]
+                j += 1
+            k += 1
+        
+        #Check for missing elements
+        while i < len(left):
+            playerArray[k] = left[i]
+            i += 1
+            k += 1
+
+        while j < len(right):
+            playerArray[k] = right[j]
+            j += 1
+            k += 1
+
+
+
+#Take all players and place their data in an array based on their starting position
+def movePlayerToSection(player):
+    position = player[1]
     
+    if(position == "PG"):
+        ALL_PG.append(player)
+    elif(position == "SG"):
+        ALL_SG.append(player)
+    elif(position == "SF"):
+        ALL_SF.append(player)
+    elif(position == "PF"):
+        ALL_PF.append(player)
+    else:
+        ALL_C.append(player)
 
 
 ##############
 # MAIN
 ##############
 
+
+
+#Setup primary array that contains all players guaranteed to start today
 getStartingPlayers(STARTING_PLAYERS)
 
-for foundPlayer in STARTING_PLAYERS[:3]:
+#For each player, add their calculated fantasy score to the end of their personal array
+for foundPlayer in STARTING_PLAYERS:
     addScore(foundPlayer)
+    #Move the player to an array based on their position
+    movePlayerToSection(foundPlayer)
 
-print(STARTING_PLAYERS[:3])
+#Sort all position arrays
+playerMergeSort(ALL_PG)
+playerMergeSort(ALL_SG)
+playerMergeSort(ALL_SF)
+playerMergeSort(ALL_PF)
+playerMergeSort(ALL_C)
 
-#Iterate through the STARTING_PLAYERS array and update each player array with their weighted fantasy score at the end
 
+#Return top 10 of each position array, all data is sorted from least to greatest
+print("Point Guards")
+for player in ALL_PG:
+    print(player[0], player[1], player[3], player[-1], "\n")
+
+print("Shooting Guards")
+for player in ALL_SG:
+    print(player[0], player[1], player[3], player[-1], "\n")
+
+print("Small Forwards")
+for player in ALL_SF:
+    print(player[0], player[1], player[3], player[-1], "\n")
+
+print("Power Forwards")
+for player in ALL_PF:
+    print(player[0], player[1], player[3], player[-1], "\n")
+
+print("Centers")
+for player in ALL_C:
+    print(player[0], player[1], player[3], player[-1], "\n")
+
+#TODO: Merge sort doesnt sort correctly, need to have position list ordered in reverse (Greatest to least)

@@ -4,6 +4,7 @@ import requests
 import time
 from bs4 import BeautifulSoup
 from requests_html import HTMLSession
+from listFunctions import *
 
 #Constants
 DAILY_LINEUP_URL = "https://www.rotowire.com/basketball/nba-lineups.php"
@@ -106,48 +107,6 @@ def addScore(player):
     time.sleep(2)
     
 
-#Merge sort algorithm to sort players by weight, code taken from: https://www.geeksforgeeks.org/merge-sort/
-def playerMergeSort(playerArray):
-    if len(playerArray) > 1:
-
-        #Middle of the array
-        mid = len(playerArray) // 2
-
-        #Left side of the Array (not including middle value)
-        left = playerArray[:mid]
-
-        #Right side fo the Array (including middle value)
-        right = playerArray[mid:]
-
-        #Sort left side
-        playerMergeSort(left)
-
-        #Sort right side
-        playerMergeSort(right)
-
-        i = j = k = 0
-
-        #Move data to left and right arrays
-        while i < len(left) and j < len(right):
-            if(left[i][-1] < right[i][-1]):
-                playerArray[k] = left[i]
-                i += 1
-            else:
-                playerArray[k] = right[j]
-                j += 1
-            k += 1
-        
-        #Check for missing elements
-        while i < len(left):
-            playerArray[k] = left[i]
-            i += 1
-            k += 1
-
-        while j < len(right):
-            playerArray[k] = right[j]
-            j += 1
-            k += 1
-
 
 
 #Take all players and place their data in an array based on their starting position
@@ -182,32 +141,32 @@ for foundPlayer in STARTING_PLAYERS:
     movePlayerToSection(foundPlayer)
 
 #Sort all position arrays
-playerMergeSort(ALL_PG)
-playerMergeSort(ALL_SG)
-playerMergeSort(ALL_SF)
-playerMergeSort(ALL_PF)
-playerMergeSort(ALL_C)
+final_PG = reverseArray(playerMergeSort(ALL_PG))
+final_SG = reverseArray(playerMergeSort(ALL_SG))
+final_SF = reverseArray(playerMergeSort(ALL_SF))
+final_PF = reverseArray(playerMergeSort(ALL_PF))
+final_C = reverseArray(playerMergeSort(ALL_C))
 
 
-#Return top 10 of each position array, all data is sorted from least to greatest
+#Return best player available at each position, from greatest to least 
 print("Point Guards")
-for player in ALL_PG:
+for player in final_PG:
     print(player[0], player[1], player[3], player[-1], "\n")
 
 print("Shooting Guards")
-for player in ALL_SG:
+for player in final_SG:
     print(player[0], player[1], player[3], player[-1], "\n")
 
 print("Small Forwards")
-for player in ALL_SF:
+for player in final_SF:
     print(player[0], player[1], player[3], player[-1], "\n")
 
 print("Power Forwards")
-for player in ALL_PF:
+for player in final_PF:
     print(player[0], player[1], player[3], player[-1], "\n")
 
 print("Centers")
-for player in ALL_C:
+for player in final_C:
     print(player[0], player[1], player[3], player[-1], "\n")
 
 #TODO: Merge sort doesnt sort correctly, need to have position list ordered in reverse (Greatest to least)

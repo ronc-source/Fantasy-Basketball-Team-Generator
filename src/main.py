@@ -103,8 +103,8 @@ def addScore(player):
         player.append(0.0)
         pass
 
-    #Dont want to spam requests to rotowire, will wait 2 seconds between requests
-    time.sleep(2)
+    #Dont want to spam requests to rotowire, will wait 2 seconds between requests - Removed for now
+    #time.sleep(2)
     
 
 
@@ -169,4 +169,4 @@ print("Centers")
 for player in final_C:
     print(player[0], player[1], player[3], player[-1], "\n")
 
-#TODO: Merge sort doesnt sort correctly, need to have position list ordered in reverse (Greatest to least)
+#TODO: Find something cool to add to the program (Ex. make an HTML website that uses this as a script to display data, or write to a csv/excel file or add a new stat (cost effective, would require cost of each player though))
